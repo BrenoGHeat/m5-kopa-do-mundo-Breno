@@ -33,3 +33,40 @@ class TeamView(APIView):
         ]
 
         return Response(teams_dict, 200)
+
+
+class TeamDetailView(APIView):
+    def get(self, request: Request, team_id: int):
+        try:
+            team = Team.objects.get(pk=team_id)
+        except Team.DoesNotExist:
+            return Response({"message": "Team not found"}, 404)
+
+        team_dict = model_to_dict(team)
+
+        return Response(team_dict, 200)
+
+    def delete(self, request: Request, team_id: int):
+        try:
+            team = Team.objects.get(pk=team_id)
+        except Team.DoesNotExist:
+            return Response({"message": "Team not found"}, 404)
+
+        team.delete()
+
+        return Response(status=204)
+
+    def patch(self, request: Request, team_id: int):
+        try:
+            team = Team.objects.get(pk=team_id)
+        except Team.DoesNotExist:
+            return Response({"message": "Team not found"}, 404)
+        for key, value in request.data.items():
+            if key != "id":
+                setattr(team, key, value)
+        team.save()
+
+        team_dict = model_to_dict(team)
+
+        return Response(team_dict, 200)
+
